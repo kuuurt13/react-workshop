@@ -119,7 +119,7 @@ class TodoList extends React.Component {
 }
 
 ReactDOM.render(
-  <TodoList startLength={200} />,
+  <TodoList startLength={2000} />,
   document.getElementById("app")
 );
 

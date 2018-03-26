@@ -5,7 +5,9 @@
   top: 0px;
   left: 0px;
   padding: 0 20px;
+  background-color: #bada55;
   cursor: url(./images/mouse.png), auto;
+  color: white
 }
 
 .cat {

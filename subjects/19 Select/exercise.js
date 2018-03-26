@@ -15,22 +15,79 @@ class Select extends React.Component {
     defaultValue: PropTypes.any
   };
 
+  state = {
+    value: null,
+    isOpen: false
+  }
+
+  componentDidMount() {
+    this.setState({ value: this.props.defaultValue })
+  }
+
+  toggleOpen = () => {
+    this.setState(state => ({
+      isOpen: !state.isOpen
+    }))
+  }
+
+  onSelect = value => {
+    this.toggleOpen()
+
+    if (this.props.defaultValue) {
+      this.setState({ value })
+    } else {
+      this.props.onChange(value)
+    }
+  }
+
   render() {
+    const currentValue = this.props.value || this.state.value
+    let label = null
+
+    React.Children.forEach(this.props.children, ({ props }) => {
+      if (props.value === currentValue) {
+        label = props.children
+      }
+    })
+
     return (
       <div className="select">
-        <div className="label">
-          label <span className="arrow">▾</span>
+        <div className="label" onClick={this.toggleOpen}>
+          {label} <span className="arrow">▾</span>
         </div>
-        <div className="options">{this.props.children}</div>
+        <div className="options" style={{ display: this.state.isOpen ? 'block': 'none' }}>
+          {React.Children.map(this.props.children, child => (
+            React.cloneElement(child, {
+              ...child.props,
+              onSelect: value => this.onSelect(value)
+            })
+          ))}
+        </div>
       </div>
     );
   }
 }
 
 class Option extends React.Component {
-  render() {
-    return <div className="option">{this.props.children}</div>;
+  static propTypes = {
+    onSelect: PropTypes.func,
   }
+
+  render() {
+    return (
+      <div
+        className="option"
+        onClick={() => this.props.onSelect(this.props.value)}
+      >
+        {this.props.children}
+      </div>
+    )
+  }
+}
+
+class Selecty extends React.Component {
+  static Select = Select
+  static Option = Option
 }
 
 class App extends React.Component {

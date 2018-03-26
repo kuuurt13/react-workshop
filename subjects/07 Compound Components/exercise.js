@@ -32,20 +32,56 @@ class RadioGroup extends React.Component {
     defaultValue: PropTypes.string
   };
 
+  state = {
+    currentValue: "fm",
+    currentIndex: 0
+  }
+
+  componentWillMount() {
+    this.props.defaultValue && this.setState({ currentValue: this.props.defaultValue })
+    document.addEventListener('keydown', this.handleKeyboard)
+  }
+
+  handleKeyboard = ({ key }) => {
+    const children = React.Children.toArray(this.props.children)
+    if (key === 'ArrowUp') {
+      const newIndex = this.state.currentIndex - 1 < 0 ? children.length - 1 : this.state.currentIndex - 1
+      this.setState({ currentValue: children[newIndex].props.value, currentIndex: newIndex })
+    } else if (key === 'ArrowDown') {
+      const newIndex = this.state.currentIndex + 1 >= children.length ? 0 : this.state.currentIndex + 1
+      this.setState({ currentValue: children[newIndex].props.value, currentIndex: newIndex })
+    }
+  }
+
   render() {
-    return <div>{this.props.children}</div>;
+    return (
+      <div>
+        {React.Children.map(this.props.children, (child, i)  =>
+          React.cloneElement(child, {
+            _isSelected: child.props.value === this.state.currentValue,
+            _onSelect: currentValue => {
+              this.setState({ currentValue, currentIndex: i })
+              this.props.onChange(currentValue)
+            }
+          })
+        )}
+      </div>
+    )
   }
 }
 
 class RadioOption extends React.Component {
   static propTypes = {
-    value: PropTypes.string
+    value: PropTypes.string,
+    _onSelect: PropTypes.func,
   };
 
   render() {
     return (
-      <div>
-        <RadioIcon isSelected={false} /> {this.props.children}
+      <div onClick={() => this.props._onSelect(this.props.value)}>
+        <RadioIcon
+          isSelected={this.props._isSelected}
+        /> {this.props.children}
       </div>
     );
   }
@@ -63,6 +99,7 @@ class RadioIcon extends React.Component {
           borderColor: "#ccc",
           borderWidth: 3,
           borderStyle: this.props.isSelected ? "inset" : "outset",
+          borderColor: this.props.isSelected ? "#bada55" : "#ccc",
           height: 16,
           width: 16,
           display: "inline-block",
@@ -74,18 +111,24 @@ class RadioIcon extends React.Component {
   }
 }
 
+class Radio extends React.Component {
+  static Group = RadioGroup
+  static Option = RadioOption
+  static Icon = RadioIcon
+}
+
 class App extends React.Component {
   render() {
     return (
       <div>
         <h1>♬ It's about time that we all turned off the radio ♫</h1>
 
-        <RadioGroup defaultValue="fm">
-          <RadioOption value="am">AM</RadioOption>
-          <RadioOption value="fm">FM</RadioOption>
-          <RadioOption value="tape">Tape</RadioOption>
-          <RadioOption value="aux">Aux</RadioOption>
-        </RadioGroup>
+        <Radio.Group defaultValue="am" onChange={value => console.log(value)}>
+          <Radio.Option value="am">AM</Radio.Option>
+          <Radio.Option value="fm">FM</Radio.Option>
+          <Radio.Option value="tape">Tape</Radio.Option>
+          <Radio.Option value="aux">Aux</Radio.Option>
+        </Radio.Group>
       </div>
     );
   }

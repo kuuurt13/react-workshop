@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Router, Route, Link } from "./mini-router";
+import { Router, Route, Link, Redirect } from "./mini-router";
 
 const App = () => (
   <div>
+    <Redirect from='/' to='/dashboard' />
     <ul>
       <li>
         <Link to="/dashboard">Dashboard</Link>
